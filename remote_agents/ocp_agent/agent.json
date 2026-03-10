@@ -1,0 +1,30 @@
+{
+  "name": "ocp_agent",
+  "description": "Specialist agent for Red Hat OpenShift Container Platform (OCP) and Kubernetes. Handles questions about cluster management, deployments, pods, services, routes, operators, upgrades, and container orchestration.",
+  "url": "http://localhost:8001/a2a/ocp_agent",
+  "version": "1.0.0",
+  "protocolVersion": "0.2.6",
+  "capabilities": {},
+  "defaultInputModes": ["text/plain"],
+  "defaultOutputModes": ["text/plain"],
+  "skills": [
+    {
+      "id": "cluster_management",
+      "name": "Cluster Management",
+      "description": "Install, upgrade, scale, and manage OCP/Kubernetes clusters",
+      "tags": ["openshift", "kubernetes", "cluster", "infrastructure"]
+    },
+    {
+      "id": "workload_management",
+      "name": "Workload Management",
+      "description": "Deploy and manage pods, deployments, statefulsets, and other workloads",
+      "tags": ["pods", "deployments", "containers", "orchestration"]
+    },
+    {
+      "id": "troubleshooting",
+      "name": "OCP Troubleshooting",
+      "description": "Diagnose and resolve cluster and workload issues",
+      "tags": ["debugging", "logs", "crashloop", "errors"]
+    }
+  ]
+}

@@ -1,0 +1,30 @@
+{
+  "name": "openstack_agent",
+  "description": "Specialist agent for Red Hat OpenStack Platform. Handles questions about virtual machines, networking (Neutron), storage (Cinder/Swift), compute (Nova), identity (Keystone), and infrastructure management.",
+  "url": "http://localhost:8001/a2a/openstack_agent",
+  "version": "1.0.0",
+  "protocolVersion": "0.2.6",
+  "capabilities": {},
+  "defaultInputModes": ["text/plain"],
+  "defaultOutputModes": ["text/plain"],
+  "skills": [
+    {
+      "id": "vm_management",
+      "name": "Virtual Machine Management",
+      "description": "Create, manage, and troubleshoot VMs with Nova",
+      "tags": ["nova", "compute", "virtual-machines", "instances"]
+    },
+    {
+      "id": "networking",
+      "name": "OpenStack Networking",
+      "description": "Configure virtual networks, routers, floating IPs with Neutron",
+      "tags": ["neutron", "networking", "ovn", "security-groups"]
+    },
+    {
+      "id": "storage",
+      "name": "Storage Management",
+      "description": "Manage block and object storage with Cinder and Swift",
+      "tags": ["cinder", "swift", "volumes", "storage"]
+    }
+  ]
+}

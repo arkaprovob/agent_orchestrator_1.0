@@ -1,0 +1,5 @@
+google-adk[a2a]>=1.17.0
+google-adk-extras>=0.3.0
+redis>=5.0.0
+aiohttp>=3.9.0
+uvicorn>=0.30.0

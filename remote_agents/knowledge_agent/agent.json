@@ -1,0 +1,36 @@
+{
+  "name": "knowledge_agent",
+  "description": "General knowledge and documentation agent for Red Hat products. Handles questions about licensing, support policies, product comparisons, general Linux administration, Ansible, RHEL, and cross-product topics.",
+  "url": "http://localhost:8001/a2a/knowledge_agent",
+  "version": "1.0.0",
+  "protocolVersion": "0.2.6",
+  "capabilities": {},
+  "defaultInputModes": ["text/plain"],
+  "defaultOutputModes": ["text/plain"],
+  "skills": [
+    {
+      "id": "product_knowledge",
+      "name": "Product Knowledge",
+      "description": "Information about Red Hat's product portfolio, licensing, and support",
+      "tags": ["licensing", "support", "products", "subscriptions"]
+    },
+    {
+      "id": "rhel_admin",
+      "name": "RHEL Administration",
+      "description": "Linux administration, security, and performance on RHEL",
+      "tags": ["rhel", "linux", "administration", "security"]
+    },
+    {
+      "id": "ansible_automation",
+      "name": "Ansible Automation",
+      "description": "Ansible playbooks, roles, collections, and Ansible Automation Platform",
+      "tags": ["ansible", "automation", "playbooks", "aap"]
+    },
+    {
+      "id": "cross_product",
+      "name": "Cross-Product Integration",
+      "description": "How different Red Hat products work together",
+      "tags": ["integration", "ecosystem", "migration"]
+    }
+  ]
+}
