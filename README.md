@@ -166,43 +166,9 @@ mkdir -p agents && cp -r orchestrator agents/orchestrator
 adk api_server --port 8000 agents/
 ```
 
-Then send requests via curl:
-
-```bash
-# Create a session
-curl -s -X POST http://localhost:8000/apps/orchestrator/users/test_user/sessions \
-  -H "Content-Type: application/json" \
-  -d '{}' | python3 -m json.tool
-
-# Run a query (replace SESSION_ID with the id from above)
-curl -s -X POST http://localhost:8000/run \
-  -H "Content-Type: application/json" \
-  -d '{
-    "app_name": "orchestrator",
-    "user_id": "test_user",
-    "session_id": "SESSION_ID",
-    "new_message": {
-      "role": "user",
-      "parts": [{"text": "How do I scale a deployment in OpenShift?"}]
-    }
-  }'
-```
-
-Or use the SSE streaming endpoint for real-time events:
-
-```bash
-curl -s -N -X POST http://localhost:8000/run_sse \
-  -H "Content-Type: application/json" \
-  -d '{
-    "app_name": "orchestrator",
-    "user_id": "test_user",
-    "session_id": "SESSION_ID",
-    "new_message": {
-      "role": "user",
-      "parts": [{"text": "How do I scale a deployment in OpenShift?"}]
-    }
-  }'
-```
+Then send requests via curl — see [Try It with curl](#try-it-with-curl) below for
+ready-to-copy examples covering single-domain, sequential, parallel, and hybrid
+multi-agent queries.
 
 #### Option D: Standalone Python Runner
 
@@ -275,6 +241,105 @@ Remembers project context from previous session.
 
 **Dynamic discovery:**
 > Deploy a new agent with an `agent.json` card → automatically available for routing.
+
+---
+
+## Try It with curl
+
+Make sure both servers are running first:
+
+```bash
+# Terminal 1 — remote agents
+bash scripts/start_remote_agents.sh
+
+# Terminal 2 — orchestrator API
+bash scripts/start_orchestrator.sh
+# (or: source .env && mkdir -p agents && cp -r orchestrator agents/orchestrator && adk api_server --port 8000 agents/)
+```
+
+### Create a session
+
+```bash
+curl -s -X POST http://localhost:8000/apps/orchestrator/users/test_user/sessions \
+  -H "Content-Type: application/json" \
+  -d '{}' | python3 -m json.tool
+```
+
+Copy the `id` value from the response — you'll use it as `SESSION_ID` below.
+
+### Single-domain query (OCP)
+
+```bash
+curl -s -X POST http://localhost:8000/run \
+  -H "Content-Type: application/json" \
+  -d '{
+    "app_name": "orchestrator",
+    "user_id": "test_user",
+    "session_id": "SESSION_ID",
+    "new_message": {
+      "role": "user",
+      "parts": [{"text": "How do I scale a deployment to 5 replicas in OpenShift?"}]
+    }
+  }'
+```
+
+Routes to `ocp_agent`. Strategy: `single`.
+
+### Multi-agent sequential (OpenStack → OCP)
+
+```bash
+curl -s -X POST http://localhost:8000/run \
+  -H "Content-Type: application/json" \
+  -d '{
+    "app_name": "orchestrator",
+    "user_id": "test_user",
+    "session_id": "SESSION_ID",
+    "new_message": {
+      "role": "user",
+      "parts": [{"text": "First explain how to set up networking in OpenStack using Neutron, then describe how to configure an OpenShift cluster to use that OpenStack network for pod connectivity."}]
+    }
+  }'
+```
+
+Routes to `openstack_agent` first, then `ocp_agent` (depends on step 1 output). Strategy: `sequential`.
+
+### Multi-agent parallel (RHEL + OCP + OpenStack)
+
+```bash
+curl -s -X POST http://localhost:8000/run \
+  -H "Content-Type: application/json" \
+  -d '{
+    "app_name": "orchestrator",
+    "user_id": "test_user",
+    "session_id": "SESSION_ID",
+    "new_message": {
+      "role": "user",
+      "parts": [{"text": "Give me a summary of RHEL 9 security features, the key improvements in OpenShift 4.15, and best practices for OpenStack Neutron network segmentation."}]
+    }
+  }'
+```
+
+Routes to `knowledge_agent`, `ocp_agent`, and `openstack_agent` simultaneously. Strategy: `parallel`.
+
+### Multi-agent hybrid (parallel gather + sequential synthesis)
+
+```bash
+curl -s -X POST http://localhost:8000/run \
+  -H "Content-Type: application/json" \
+  -d '{
+    "app_name": "orchestrator",
+    "user_id": "test_user",
+    "session_id": "SESSION_ID",
+    "new_message": {
+      "role": "user",
+      "parts": [{"text": "Compare the storage options available in both OpenShift and OpenStack, then recommend a unified storage strategy for running containerized workloads on OpenStack infrastructure."}]
+    }
+  }'
+```
+
+Routes to `ocp_agent` and `openstack_agent` in parallel, then synthesizes a unified recommendation. Strategy: `hybrid`.
+
+> **Tip:** Create a new session (repeat the session creation step) for each query to avoid context carryover between tests.
 
 ---
 
