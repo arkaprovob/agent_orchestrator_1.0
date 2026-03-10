@@ -252,6 +252,21 @@ Routes to Knowledge Agent (cross-product integration), explains OCP-on-OpenStack
 
 Routes to Knowledge Agent, returns detailed version comparison.
 
+**Multi-agent sequential execution:**
+> "First explain how to set up networking in OpenStack using Neutron, then describe how to configure an OpenShift cluster to use that OpenStack network for pod connectivity."
+
+Routes to OpenStack Agent first, then OCP Agent — output of the first step feeds the second. Strategy: `sequential`.
+
+**Multi-agent parallel execution:**
+> "Give me a summary of RHEL 9 security features, the key improvements in OpenShift 4.15, and best practices for OpenStack Neutron network segmentation."
+
+Routes to Knowledge Agent, OCP Agent, and OpenStack Agent simultaneously — all three steps are independent. Strategy: `parallel`.
+
+**Multi-agent hybrid execution:**
+> "Compare the storage options available in both OpenShift and OpenStack, then recommend a unified storage strategy for running containerized workloads on OpenStack infrastructure."
+
+Routes to OCP Agent and OpenStack Agent in parallel to gather storage options, then synthesizes a unified recommendation that depends on both outputs. Strategy: `hybrid`.
+
 **Memory continuity:**
 > Session 1: "I'm working on project Atlas using OCP 4.14"
 > Session 2: "What are the upgrade paths for my cluster?"

@@ -2,17 +2,20 @@
 """
 End-to-end test for the Lightspeed Orchestrator.
 
-Runs 3 test scenarios:
+Runs 6 test scenarios:
   1. Single-domain: OCP-only question
   2. Cross-domain: OCP + OpenStack question
   3. General knowledge: handled by knowledge agent or orchestrator self-answer
+  4. Multi-agent sequential: OpenStack networking -> OCP cluster config on top
+  5. Multi-agent parallel: independent RHEL, OCP, and OpenStack questions
+  6. Multi-agent hybrid: parallel OCP + OpenStack storage, then unified recommendation
 
 Requires remote agents running on port 8001 (adk api_server --a2a remote_agents/).
 """
 
 import asyncio
+import json
 import logging
-import os
 import traceback
 
 from dotenv import load_dotenv
@@ -38,6 +41,30 @@ TEST_QUERIES = [
     {
         "name": "General knowledge (RHEL/Ansible)",
         "query": "What is the difference between RHEL 8 and RHEL 9?",
+    },
+    {
+        "name": "Multi-agent sequential (OpenStack -> OCP)",
+        "query": (
+            "First explain how to set up networking in OpenStack using Neutron, "
+            "then describe how to configure an OpenShift cluster to use that "
+            "OpenStack network for pod connectivity."
+        ),
+    },
+    {
+        "name": "Multi-agent parallel (RHEL + OCP + OpenStack)",
+        "query": (
+            "Give me a summary of RHEL 9 security features, the key improvements "
+            "in OpenShift 4.15, and best practices for OpenStack Neutron network "
+            "segmentation."
+        ),
+    },
+    {
+        "name": "Multi-agent hybrid (parallel gather + sequential synthesis)",
+        "query": (
+            "Compare the storage options available in both OpenShift and OpenStack, "
+            "then recommend a unified storage strategy for running containerized "
+            "workloads on OpenStack infrastructure."
+        ),
     },
 ]
 
@@ -110,6 +137,18 @@ async def run_test():
             plan = updated_session.state.get("execution_plan", "N/A")
             final = updated_session.state.get("final_response", final_response)
 
+            strategy = "unknown"
+            if isinstance(plan, str):
+                try:
+                    plan_cleaned = plan.strip()
+                    if plan_cleaned.startswith("```"):
+                        plan_cleaned = plan_cleaned.split("\n", 1)[-1]
+                        plan_cleaned = plan_cleaned.rsplit("```", 1)[0]
+                    plan_dict = json.loads(plan_cleaned)
+                    strategy = plan_dict.get("execution_strategy", "unknown")
+                except (json.JSONDecodeError, ValueError):
+                    pass
+
             print(f"\n--- Plan ---")
             print(plan[:500] if isinstance(plan, str) else str(plan)[:500])
             print(f"\n--- Final Response ---")
@@ -117,6 +156,7 @@ async def run_test():
             print(response_text[:800] if response_text else "[No response]")
             print(f"\n--- Stats ---")
             print(f"  Events: {event_count}")
+            print(f"  Execution Strategy: {strategy}")
             print(f"  Status: {'PASS' if response_text else 'FAIL'}")
 
         except Exception as e:
