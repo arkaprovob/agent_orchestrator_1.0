@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Standalone runner for the Lightspeed Orchestrator.
+Standalone runner for the Agent Orchestrator.
 
 Demonstrates:
   - Redis-backed session service for persistent, cross-surface sessions
@@ -143,7 +143,7 @@ async def run_interactive(user_id: str, session_id: str):
     )
 
     print("\n" + "=" * 60)
-    print("  Lightspeed Unified AI Assistant")
+    print("  Agent Orchestrator — AI Assistant")
     print("  (type 'quit' to exit, 'context' to see session state)")
     print("=" * 60 + "\n")
 
@@ -178,7 +178,7 @@ async def run_interactive(user_id: str, session_id: str):
             parts=[types.Part(text=user_input)],
         )
 
-        print("\nLightspeed: ", end="", flush=True)
+        print("\nOrchestrator: ", end="", flush=True)
 
         final_response = ""
         events = runner.run_async(
@@ -219,7 +219,7 @@ async def run_interactive(user_id: str, session_id: str):
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Lightspeed Orchestrator — Interactive Runner"
+        description="Agent Orchestrator — Interactive Runner"
     )
     parser.add_argument(
         "--user-id",

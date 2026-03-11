@@ -1,12 +1,12 @@
 """
-Configuration for the Lightspeed Unified Orchestrator.
+Configuration for the Agent Orchestrator.
 """
 
 # --- Model Configuration ---
 LLM_MODEL = "gemini-2.5-flash"
 
 # --- Application Identity ---
-APP_NAME = "lightspeed_orchestrator"
+APP_NAME = "agent_orchestrator"
 
 # --- Redis Configuration ---
 USE_REDIS = False  # Set to True when Redis is available

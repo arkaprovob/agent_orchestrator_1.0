@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-End-to-end test for the Lightspeed Orchestrator.
+End-to-end test for the Agent Orchestrator.
 
 Runs 6 test scenarios:
   1. Single-domain: OCP-only question

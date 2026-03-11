@@ -1,5 +1,5 @@
 """
-Lightspeed Unified Orchestrator Agent.
+Agent Orchestrator.
 
 ARCHITECTURE: Plan-First, Discover-Then-Execute
 
@@ -215,7 +215,7 @@ self_answerer = LlmAgent(
 # Orchestrator — Custom BaseAgent
 # =============================================================================
 
-class LightspeedOrchestrator(BaseAgent):
+class AgentOrchestrator(BaseAgent):
     """
     Plan-first orchestrator with dynamic agent discovery.
 
@@ -725,8 +725,8 @@ class LightspeedOrchestrator(BaseAgent):
 # The orchestrator discovers everything from the registry at runtime.
 # =============================================================================
 
-root_agent = LightspeedOrchestrator(
-    name="lightspeed_orchestrator",
+root_agent = AgentOrchestrator(
+    name="agent_orchestrator",
     planner=planner,
     plan_refiner=plan_refiner,
     response_assembler=response_assembler,

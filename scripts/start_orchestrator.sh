@@ -1,6 +1,6 @@
 #!/bin/bash
 # =============================================================================
-# Start the Lightspeed Orchestrator with ADK Web UI.
+# Start the Agent Orchestrator with ADK Web UI.
 #
 # Prerequisites:
 #   - Remote agents must be running (see start_remote_agents.sh)
@@ -26,7 +26,7 @@ if [ -f "$PROJECT_DIR/venv/bin/activate" ]; then
 fi
 
 echo "=============================================="
-echo " Lightspeed — Starting Orchestrator"
+echo " Agent Orchestrator — Starting"
 echo "=============================================="
 echo ""
 

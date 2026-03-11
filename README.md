@@ -191,7 +191,122 @@ docker run -d -p 6379:6379 redis:latest
 
 Set `USE_REDIS=True` in `orchestrator/config.py` to enable Redis-backed sessions.
 
-### Step 4: Run Automated Tests
+### Step 4: Run with Docker / Podman
+
+The project includes a Dockerfile and a build script that automatically detects your
+OS and CPU architecture (x86_64 / Apple Silicon / ARM) and builds the correct image.
+
+#### Quick start
+
+```bash
+# Build and run in one command
+bash scripts/docker_build_run.sh
+```
+
+The script auto-detects Docker or Podman — whichever is installed.
+
+#### Build only
+
+```bash
+bash scripts/docker_build_run.sh build
+```
+
+#### Run only (image must already exist)
+
+```bash
+bash scripts/docker_build_run.sh run
+```
+
+#### Stop the container
+
+```bash
+bash scripts/docker_build_run.sh stop
+```
+
+#### What the container runs
+
+The image bundles both services in a single container:
+
+| Service | Internal Port | Default Host Port |
+|---|---|---|
+| Remote A2A Agents | 8001 | 8001 |
+| Orchestrator Web UI | 8000 | 8000 |
+
+The entrypoint starts remote agents first, waits for them to be healthy, then starts
+the orchestrator.
+
+#### Environment variables
+
+| Variable | Required | Default | Description |
+|---|---|---|---|
+| `GOOGLE_API_KEY` | **Yes** | — | Google AI API key (paid-tier recommended) |
+| `ORCHESTRATOR_PORT` | No | `8000` | Host port for the orchestrator |
+| `REMOTE_AGENTS_PORT` | No | `8001` | Host port for remote agents |
+| `USE_REDIS` | No | `false` | Enable Redis-backed sessions |
+| `REDIS_HOST` | No | `localhost` | Redis host (use host.containers.internal for host Redis) |
+| `REDIS_PORT` | No | `6379` | Redis port |
+| `IMAGE_NAME` | No | `agent-orchestrator` | Docker image name |
+| `IMAGE_TAG` | No | `latest` | Docker image tag |
+| `CONTAINER_NAME` | No | `agent-orchestrator` | Container name |
+| `CONTAINER_ENGINE` | No | auto-detect | Force `docker` or `podman` |
+
+#### Passing environment variables
+
+The build script automatically loads your `.env` file from the project root, so if
+you already have `GOOGLE_API_KEY` set there, no extra steps are needed:
+
+```bash
+bash scripts/docker_build_run.sh run
+```
+
+You can also pass variables inline or via `export`:
+
+```bash
+# Inline
+GOOGLE_API_KEY=your_key_here bash scripts/docker_build_run.sh run
+
+# Or export first
+export GOOGLE_API_KEY=your_key_here
+bash scripts/docker_build_run.sh run
+```
+
+Multiple variables work the same way:
+
+```bash
+GOOGLE_API_KEY=your_key_here ORCHESTRATOR_PORT=9000 USE_REDIS=true \
+  bash scripts/docker_build_run.sh run
+```
+
+#### Custom ports example
+
+```bash
+ORCHESTRATOR_PORT=9000 REMOTE_AGENTS_PORT=9001 bash scripts/docker_build_run.sh
+```
+
+#### Verify the container
+
+```bash
+# Check remote agents
+curl http://localhost:8001/list-apps
+# ["knowledge_agent","ocp_agent","openstack_agent"]
+
+# Check orchestrator (redirects to Web UI)
+curl -I http://localhost:8000/
+```
+
+#### Architecture support
+
+The build script detects the host machine and sets `--platform` accordingly:
+
+| Host | Platform flag |
+|---|---|
+| Intel / AMD (x86_64) | `linux/amd64` |
+| Apple Silicon (M1/M2/M3/M4) | `linux/arm64` |
+| ARM 32-bit (armv7l) | `linux/arm/v7` |
+
+---
+
+### Step 5: Run Automated Tests
 
 ```bash
 source .env
@@ -362,3 +477,69 @@ All commands support these useful flags:
 | `--session_service_uri URI` | Session backend (`memory://`, `sqlite://path`) |
 | `--memory_service_uri URI` | Memory backend (`memory://`, `rag://corpus_id`) |
 | `--reload` | Auto-reload on code changes |
+
+---
+
+## Docker Image Distribution
+
+### Push to a Container Registry
+
+Tag and push the image to any OCI-compliant registry (Docker Hub, Quay.io, GHCR, etc.):
+
+```bash
+# Tag for your registry
+podman tag agent-orchestrator:latest quay.io/YOUR_ORG/agent-orchestrator:latest
+
+# Push
+podman push quay.io/YOUR_ORG/agent-orchestrator:latest
+```
+
+Replace `podman` with `docker` if that's your engine. Replace `quay.io/YOUR_ORG` with
+your actual registry path.
+
+### Pull and Run on Another Machine
+
+```bash
+# Pull
+podman pull quay.io/YOUR_ORG/agent-orchestrator:latest
+
+# Run
+podman run -d \
+  --name agent-orchestrator \
+  -p 8000:8000 \
+  -p 8001:8001 \
+  -e GOOGLE_API_KEY=your_key_here \
+  quay.io/YOUR_ORG/agent-orchestrator:latest
+```
+
+### Multi-Architecture Images
+
+To build and push a multi-arch manifest (e.g., for both `amd64` and `arm64`):
+
+```bash
+# With Docker Buildx
+docker buildx create --use
+docker buildx build \
+  --platform linux/amd64,linux/arm64 \
+  -t quay.io/YOUR_ORG/agent-orchestrator:latest \
+  --push .
+
+# With Podman manifest
+podman build --platform linux/amd64 -t agent-orchestrator:amd64 .
+podman build --platform linux/arm64 -t agent-orchestrator:arm64 .
+podman manifest create agent-orchestrator:latest \
+  agent-orchestrator:amd64 \
+  agent-orchestrator:arm64
+podman manifest push agent-orchestrator:latest \
+  quay.io/YOUR_ORG/agent-orchestrator:latest
+```
+
+### Save / Load for Offline Transfer
+
+```bash
+# Export to a tar file
+podman save agent-orchestrator:latest -o agent-orchestrator.tar
+
+# Import on another machine
+podman load -i agent-orchestrator.tar
+```

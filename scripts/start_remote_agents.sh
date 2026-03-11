@@ -28,7 +28,7 @@ if [ -f "$PROJECT_DIR/venv/bin/activate" ]; then
 fi
 
 echo "=============================================="
-echo " Lightspeed — Starting Remote Agents"
+echo " Agent Orchestrator — Starting Remote Agents"
 echo "=============================================="
 echo ""
 
